@@ -1,80 +1,88 @@
-﻿namespace OrderApi.Orders
+﻿using System.Data.SQLite;
+
+namespace OrderApi.Orders
 {
     internal class CreateNewOrder
     {
         public Order NewOrder()
         {
+            var orderItemsList = new List<OrderItems>();
+           // var completeOrder = new Order();
+            var nextItem = true;
             Console.WriteLine("Enter customer name: ");
             var customerName = Console.ReadLine();
 
-            OrderItems order = new OrderItems();
-
-            Console.WriteLine("Enter product name: ");
-            order.ProductName = Console.ReadLine();
-
-            Console.WriteLine("Enter quantity: ");
-            order.Quantity = Convert.ToInt32(Console.ReadLine());
-
-            Console.WriteLine("Enter price per unit: ");
-            order.PricePerUnit = Convert.ToDecimal(Console.ReadLine());
-
-            return new Order
+            while (nextItem)
             {
-                OrderId = 1,
+                var orderItems = new OrderItems();
+
+                Console.WriteLine("Enter product name: ");
+                orderItems.ProductName = Console.ReadLine();
+
+                Console.WriteLine("Enter quantity: ");
+                orderItems.Quantity = Convert.ToInt32(Console.ReadLine());
+
+                Console.WriteLine("Enter price per unit: ");
+                orderItems.PricePerUnit = Convert.ToDecimal(Console.ReadLine());
+                orderItemsList.Add(orderItems);
+
+                Console.WriteLine("Do you want to add another item? (Y/N)");
+                var response = Console.ReadLine();
+                if (response.ToUpper() == "N")
+                    nextItem = false;
+                else if (response.ToUpper() == "Y")
+                    nextItem = true;
+            }
+            return (new Order
+            {
                 CustomerName = customerName,
                 OrderCreationDate = DateTime.Now,
                 Status = OrderStatus.New,
-                OrderItems = new List<OrderItems> { order }
-            };
+                OrderItems = orderItemsList
+            }); ;
         }
 
-        public void SaveNewOrder(SqlConnection connection, Order Order)
+        public void SaveNewOrder(SQLiteConnection connection, Order orderList)
         {
-            var order = Order;
-            var x = order.OrderItems;
-
             try
             {
-                using (connection)
+                connection.Open();
+
+                string query = "INSERT INTO Orders (CustomerName, DateCreated, Status) VALUES (@CustomerName, @OrderCreationDate, @Status); SELECT last_insert_rowid();";
+                int orderId;
+
+                using (SQLiteCommand sqlQuery = new SQLiteCommand(query, connection))
                 {
-                    string query = "INSERT INTO Order (CustomerName, OrderCreationDate, Status) VALUES (@CustomerName, @OrderCreationDate, @Status)";
-                    using (SqlCommand sqlQuery = new SqlCommand(query))
+                    sqlQuery.Parameters.AddWithValue("@CustomerName", orderList.CustomerName);
+                    sqlQuery.Parameters.AddWithValue("@OrderCreationDate", orderList.OrderCreationDate);
+                    sqlQuery.Parameters.AddWithValue("@Status", orderList.Status);
+
+                    orderId = Convert.ToInt32(sqlQuery.ExecuteScalar());
+                }
+
+                foreach (var order in orderList.OrderItems)
+                {
+                    string query2 = "INSERT INTO OrderItems (OrderId, ProductName, Quantity, PricePerUnit) VALUES (@OrderId, @ProductName, @Quantity, @PricePerUnit)";
+                    using (SQLiteCommand sqlQuery = new SQLiteCommand(query2, connection))
                     {
-                        sqlQuery.Connection = connection;
-                        Console.WriteLine("Enter note title:");
-                        string title = Console.ReadLine();
-                        Console.WriteLine("Enter note content:");
-                        string content = Console.ReadLine();
-
-                        sqlQuery.Parameters.Add("@CustomerName", System.Data.SqlDbType.VarChar, 30).Value = order.CustomerName;
-                        sqlQuery.Parameters.Add("@OrderCreationDate", System.Data.SqlDbType.VarChar, 30).Value = order.OrderCreationDate;
-                        sqlQuery.Parameters.Add("@Status", System.Data.SqlDbType.VarChar, 30).Value = order.Status;
-                        connection.Open();
+                        sqlQuery.Parameters.AddWithValue("@ProductName", order.ProductName);
+                        sqlQuery.Parameters.AddWithValue("@Quantity", order.Quantity);
+                        sqlQuery.Parameters.AddWithValue("@PricePerUnit", order.PricePerUnit);
+                        sqlQuery.Parameters.AddWithValue("@OrderId", orderId);
                         sqlQuery.ExecuteNonQuery();
-                        connection.Close();
-                    }
-
-                    string query2 = "INSERT INTO OrderItems (ProductName, Quantity, PricePerUnit) VALUES (@ProductName, @Quantity, @PricePerUnit)";
-                    using (SqlCommand sqlQuery = new SqlCommand(query2))
-                    {
-
-                        sqlQuery.Parameters.Add("@ProductName", System.Data.SqlDbType.VarChar, 30).Value = x[0].ProductName;
-                        sqlQuery.Parameters.Add("@Quantity", System.Data.SqlDbType.VarChar, 30).Value = x[0].Quantity;
-                        sqlQuery.Parameters.Add("@PricePerUnit", System.Data.SqlDbType.VarChar, 30).Value = x[0].PricePerUnit;
-                        connection.Open();
-                        sqlQuery.ExecuteNonQuery();
-                        connection.Close();
                     }
                 }
+
+                Console.WriteLine("Order and order items created successfully.");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
             }
+            finally
+            {
+                connection.Close();
+            }
         }
     }
 }
-
-
-
-

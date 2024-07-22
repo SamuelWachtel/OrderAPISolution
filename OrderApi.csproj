@@ -20,20 +20,17 @@
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="126.0.6478.12600" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="SQLite" Version="3.13.0" />
     <PackageReference Include="System.Collections" Version="4.3.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
     <PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
     <PackageReference Include="TaskScheduler" Version="2.11.0" />
     <PackageReference Include="TinyCsvParser" Version="2.7.0" />
     <PackageReference Include="Topshelf" Version="4.3.0" />
     <PackageReference Include="TopShelf.ServiceInstaller" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="README.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

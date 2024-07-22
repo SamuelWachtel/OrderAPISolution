@@ -1,22 +1,40 @@
-﻿namespace OrderApi.Orders
+﻿using System.Data.SQLite;
+
+namespace OrderApi.Orders
 {
     internal class ListAllOrders
     {
-        public static void ListOrders(SqlConnection connection)
+        public void ListOrders(SQLiteConnection connection)
         {
             try
             {
-                string query = "SELECT * FROM Orders JOIN OrderItems ON Orders.OrderId = OrderItems.OrderId";
 
-                connection.Open();
-                using (SqlDataReader reader = query.ExecuteReader())
+                string query = @"
+                   SELECT Orders.OrderId, Orders.CustomerName, Orders.DateCreated, Orders.Status, OrderItems.OrderItemId, OrderItems.ProductName, OrderItems.Quantity, 
+                    OrderItems.PricePerUnit, OrderItems.OrderId FROM Orders JOIN OrderItems ON Orders.OrderId = OrderItems.OrderId";
+
+                using (SQLiteCommand sqlQuery = new SQLiteCommand(query, connection))
                 {
-                    while (reader.Read())
+                    connection.Open();
+                    using (SQLiteDataReader reader = sqlQuery.ExecuteReader())
                     {
-                        Console.WriteLine($"OrderId: {reader["OrderId"]}, Customer name: {reader["CustomerName"]}, Creation date: {reader["OrderCreationDate"]}, Order status: {reader["Status"]}, Order items: {reader["ProductName"]} - {reader["Quantity"]} - {reader["PricePerUnit"]}");
+
+                        while (reader.Read())
+                        {
+
+                            Console.WriteLine($"OrderId: {reader["OrderId"]}" +
+                                $"\nCustomer name: {reader["CustomerName"]}" +
+                                $"\nCreation date: {reader["DateCreated"]}" +
+                                $"\nOrder status: {reader["Status"]}" +
+                                $"\nOrder item id: {reader["OrderItemId"]}" +
+                                $"\nProduct name: {reader["ProductName"]}" +
+                                $"\nQuantity: {reader["Quantity"]}" +
+                                $"\nPrice per unit: {reader["PricePerUnit"]}" +
+                                $"\nFK: {reader["OrderId"]}");
+                            Console.WriteLine("\n--------------------------------------------------\n");
+                        }
                     }
                 }
-
             }
             catch (Exception ex)
             {

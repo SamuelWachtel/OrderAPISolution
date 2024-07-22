@@ -6,7 +6,7 @@
         public string CustomerName { get; set; }
         public DateTime OrderCreationDate { get; set; }
         public OrderStatus Status { get; set; }
-        public OrderItems OrderItems { get; set; }
+        public List<OrderItems> OrderItems { get; set; }
     }
 
     public class OrderItems
