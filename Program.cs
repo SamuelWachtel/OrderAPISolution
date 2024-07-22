@@ -47,7 +47,8 @@ namespace OrderApi
                             break;
                         case 3:
                             var paymentUpdate = new UpdatePaymentStatus();
-                            await sendAPI.SetOrder(paymentUpdate.PaymentUpdate(connection));
+                            Order updatedOrder = await paymentUpdate.PaymentUpdate(connection);
+                            await sendAPI.SetOrder(updatedOrder);
                             break;
                         default:
                             Console.WriteLine("Invalid choice");

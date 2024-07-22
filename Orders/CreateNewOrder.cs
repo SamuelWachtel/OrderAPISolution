@@ -55,7 +55,7 @@ namespace OrderApi.Orders
                 {
                     sqlQuery.Parameters.AddWithValue("@CustomerName", orderList.CustomerName);
                     sqlQuery.Parameters.AddWithValue("@OrderCreationDate", orderList.OrderCreationDate);
-                    sqlQuery.Parameters.AddWithValue("@Status", orderList.Status);
+                    sqlQuery.Parameters.AddWithValue("@Status", orderList.Status.ToString());
 
                     orderId = Convert.ToInt32(sqlQuery.ExecuteScalar());
                 }
